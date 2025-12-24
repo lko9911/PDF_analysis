@@ -1,16 +1,19 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
-import openai
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+import openai
 import os
+import shutil
 
+# 환경변수 로드
 load_dotenv()
 
-openai.api_key = os.getenv("YOUR_OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------- 텍스트 분석 ----------
 class TextRequest(BaseModel):
     text: str
 
@@ -40,4 +44,22 @@ def analyze_text(req: TextRequest):
         messages=[{"role": "user", "content": prompt}]
     )
 
-    return {"result": response.choices[0].message.content}
+    return {
+        "result": response.choices[0].message.content
+    }
+
+# ---------- PDF 업로드 ----------
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@app.post("/upload-pdf")
+async def upload_pdf(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {
+        "filename": file.filename,
+        "path": file_path
+    }
