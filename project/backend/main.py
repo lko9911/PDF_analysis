@@ -1,6 +1,7 @@
+# FastAPI 기반 PDF 업로드 + 텍스트 추출 + OpenAI 요약 서버
 import os
 import shutil
-import fitz  # PyMuPDF
+import fitz  # Pdf에서 텍스트를 추출하는 라이브러리
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
