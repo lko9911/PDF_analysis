@@ -2,3 +2,4 @@
 .env
 **/.env
 *.pdf
+pdf_text_pages
